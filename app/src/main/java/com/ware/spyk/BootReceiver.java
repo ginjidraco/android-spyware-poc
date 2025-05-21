@@ -25,13 +25,13 @@ public class BootReceiver extends BroadcastReceiver {
                     .build();
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                    "LocationTracking",
+                    "LocalisationWorker",
                     ExistingPeriodicWorkPolicy.KEEP,
                     request);
 
             PeriodicWorkRequest dailyExfiltration =
-                    //new PeriodicWorkRequest.Builder(DailyExfiltrationWorker.class, 15, TimeUnit.MINUTES)
-                    new PeriodicWorkRequest.Builder(DailyExfiltrationWorker.class, 1, TimeUnit.DAYS)
+                    new PeriodicWorkRequest.Builder(DailyExfiltrationWorker.class, 15, TimeUnit.MINUTES)
+                    //new PeriodicWorkRequest.Builder(DailyExfiltrationWorker.class, 1, TimeUnit.DAYS)
                             .build();
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(

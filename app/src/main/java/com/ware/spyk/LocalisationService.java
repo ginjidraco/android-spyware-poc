@@ -54,7 +54,11 @@ public class LocalisationService extends Service {
             }
 
             @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {}
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                // Handle status changes
+                Log.d("MyLocationListener", "Status changed for provider $provider: $status");
+                // Make sure this method has the correct signature and is implemented
+            }
             @Override
             public void onProviderEnabled(String provider) {}
             @Override
